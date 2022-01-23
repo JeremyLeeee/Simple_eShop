@@ -7,7 +7,6 @@
         <div class="col-sm-12">
             <div class="panel panel-default panel-table">
                 <div class="panel-heading">Order list
-
                 </div>
                 <div class="panel-body">
                     <div class="table-responsive noSwipe">
@@ -16,8 +15,9 @@
                             <tr>
                                 <th style="width:20%;">ID</th>
                                 <th style="width:17%;">UserName</th>
-                                <th style="width:15%;">ProductName</th>
-                                <th style="width:10%;">Status</th>
+                                <th style="width:25%;">ProductName</th>
+                                <th style="width:25%;">Status</th>
+                                <th style="width:30%;">Operation</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -28,6 +28,7 @@
                                 <td class="milestone"> {{$v.productName}}
                                 </td>
                                 <td class="cell-detail">{{ if eq $v.orderStatus "1"}} Start shipping {{else}} Wait for shipping {{end}}</td>
+                                <td class="cell-detail"><a href="/order/manager?id={{$v.ID}}"><button class="btn btn-space btn-primary">Modify</button></a> <a href="/order/delete?id={{$v.ID}}"><button class="btn btn-space btn-danger">Delete</button></a>   </td>
                             </tr>
                             {{end}}
                             </tbody>

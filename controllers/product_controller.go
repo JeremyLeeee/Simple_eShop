@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"product/common"
-	"product/datamodels"
-	"product/servies"
+	"eshop/common"
+	"eshop/datamodels"
+	"eshop/servies"
 	"strconv"
 
 	"github.com/kataras/iris/v12"

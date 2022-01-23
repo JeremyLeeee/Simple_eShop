@@ -2,12 +2,10 @@ package repositories
 
 import (
 	"database/sql"
+	"eshop/common"
+	"eshop/datamodels"
 	"log"
-	"product/common"
-	"product/datamodels"
 	"strconv"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type IProduct interface {

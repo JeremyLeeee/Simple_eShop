@@ -2,9 +2,10 @@ package repositories
 
 import (
 	"database/sql"
+	"eshop/common"
+	"eshop/datamodels"
 	"log"
-	"product/common"
-	"product/datamodels"
+
 	"strconv"
 )
 

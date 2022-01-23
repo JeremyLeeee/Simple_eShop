@@ -3,18 +3,25 @@ package common
 import (
 	"database/sql"
 	"log"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var CONNPATH = "root:iam59!z$@tcp(106.52.119.98:3306)/eshop"
+var once sync.Once
+var Db *sql.DB
 
 func NewMysqlConn() (db *sql.DB, err error) {
-	db, err = sql.Open("mysql", CONNPATH)
-	if err != nil {
-		log.Println(err)
-	}
-	return
+	// singleton
+	once.Do(func() {
+		Db, err = sql.Open("mysql", CONNPATH)
+		if err != nil {
+			log.Println(err)
+		}
+	})
+
+	return Db, err
 }
 
 // get one row

@@ -2,11 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"product/common"
-	"product/controllers"
-	"product/repositories"
-	"product/servies"
+	"eshop/modules"
+	"log"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
@@ -28,29 +25,15 @@ func main() {
 		ctx.ViewLayout("")
 		ctx.View("shared/error.html")
 	})
-
-	db, err := common.NewMysqlConn()
-
-	if err != nil {
-		fmt.Println(err)
-	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	// register controller
-	productRepo := repositories.NewProductManager("product", db)
-	productService := servies.NewProductService(productRepo)
-	productParty := app.Party("/product")
-	productMVC := mvc.New(productParty)
-	productMVC.Register(ctx, productService)
-	productMVC.Handle(new(controllers.ProductController))
+	order := modules.NewOrderModule()
+	RegisterMVC(order, app, ctx)
 
-	orderRepo := repositories.NewOrderManager("order", db)
-	orderService := servies.NewOrderService(orderRepo)
-	orderParty := app.Party("/order")
-	orderMVC := mvc.New(orderParty)
-	orderMVC.Register(ctx, orderService)
-	orderMVC.Handle(new(controllers.OrderController))
+	product := modules.NewProductModule()
+	RegisterMVC(product, app, ctx)
 
 	// start service
 	app.Run(
@@ -58,4 +41,17 @@ func main() {
 		iris.WithoutServerError(iris.ErrServerClosed),
 	)
 
+}
+
+func RegisterMVC(module modules.IModule, app *iris.Application, ctx context.Context) {
+	log.Println("Register " + module.GetModuleName())
+
+	service := module.GetService()
+	controller := module.GetController()
+
+	party := app.Party("/" + module.GetModuleName())
+
+	MVC := mvc.New(party)
+	MVC.Register(ctx, service)
+	MVC.Handle(controller)
 }

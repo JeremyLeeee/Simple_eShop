@@ -1,8 +1,8 @@
 package servies
 
 import (
-	"product/datamodels"
-	"product/repositories"
+	"eshop/datamodels"
+	"eshop/repositories"
 )
 
 type IOrderService interface {

@@ -1,4 +1,4 @@
-module product
+module eshop
 
 go 1.17
 

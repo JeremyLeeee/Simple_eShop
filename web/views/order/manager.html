@@ -1,5 +1,5 @@
 <div class="page-head">
-    <h2 class="page-head-title">Product Management</h2>
+    <h2 class="page-head-title">Order Management</h2>
 
 </div>
 
@@ -9,30 +9,30 @@
             <div class="panel panel-default panel-border-color panel-border-color-primary">
                 <div class="panel-heading panel-heading-divider">Product details</div>
                 <div class="panel-body">
-                    <form action="/product/update" style="border-radius: 0px;" class="form-horizontal group-border-dashed" method="post" >
+                    <form action="/order/update" style="border-radius: 0px;" class="form-horizontal group-border-dashed" method="post" >
                         <input type="text" name="ID" value="{{.product.ID}}" hidden>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Order ID</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" name="ProductName" value="{{.order.ID}}">
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">Product name</label>
                             <div class="col-sm-6">
-                                <input type="text" class="form-control" name="ProductName" value="{{.product.ProductName}}">
+                                <input type="text" class="form-control" name="ProductNum" value="{{.order.ProductId}}">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">Product amount</label>
+                            <label class="col-sm-3 control-label">User name</label>
                             <div class="col-sm-6">
-                                <input type="text" class="form-control" name="ProductNum" value="{{.product.ProductNum}}">
+                                <input type="text" class="form-control" name="ProductNum" value="{{.order.UserId}}">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">Product image</label>
+                            <label class="col-sm-3 control-label">Status</label>
                             <div class="col-sm-6">
-                                <input type="text"   class="form-control" name="ProductImage" value="{{.product.ProductImage}}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Product url</label>
-                            <div class="col-sm-6">
-                                <input type="text"   class="form-control" name="ProductUrl" value="{{.product.ProductUrl}}">
+                                <input type="text"   class="form-control" name="ProductImage" value="{{.order.OrderStatus}}">
                             </div>
                         </div>
                         <div class="row xs-pt-15">
@@ -43,7 +43,6 @@
                                 </p>
                             </div>
                         </div>
-
                     </form>
                 </div>
             </div>
