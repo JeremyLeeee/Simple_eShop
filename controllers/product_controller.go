@@ -4,6 +4,7 @@ import (
 	"eshop/common"
 	"eshop/datamodels"
 	"eshop/servies"
+	"log"
 	"strconv"
 
 	"github.com/kataras/iris/v12"
@@ -16,7 +17,10 @@ type ProductController struct {
 }
 
 func (p *ProductController) GetAll() mvc.View {
-	products, _ := p.ProductService.GetAllProduct()
+	products, err := p.ProductService.GetAllProduct()
+	if err != nil {
+		log.Fatalln("GetAllProduct err:", err)
+	}
 	return mvc.View{
 		Name: "product/view.html",
 		Data: iris.Map{
@@ -38,7 +42,7 @@ func (p *ProductController) PostUpdate() {
 	if err != nil {
 		p.Ctx.Application().Logger().Debug(err)
 	}
-	p.Ctx.Redirect("product/all")
+	p.Ctx.Redirect("all")
 }
 
 func (p *ProductController) GetAdd() mvc.View {
@@ -60,7 +64,7 @@ func (p *ProductController) PostAdd() {
 	if err != nil {
 		p.Ctx.Application().Logger().Debug(err)
 	}
-	p.Ctx.Redirect("product/all")
+	p.Ctx.Redirect("all")
 }
 
 func (p *ProductController) GetManager() mvc.View {
@@ -94,5 +98,5 @@ func (p *ProductController) GetDelete() {
 	} else {
 		p.Ctx.Application().Logger().Debug("delete id: " + idString + " failed")
 	}
-	p.Ctx.Redirect("product/all")
+	p.Ctx.Redirect("all")
 }

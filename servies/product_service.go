@@ -34,7 +34,6 @@ func (s *ProductService) DeleteProductById(id int64) bool {
 }
 
 func (s *ProductService) InsertProduct(product *datamodels.Product) (int64, error) {
-	// log.Println("insert: " + product.ProductName)
 	return s.productRepository.Insert(product)
 }
 

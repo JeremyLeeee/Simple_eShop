@@ -14,7 +14,7 @@ type ProductModule struct {
 }
 
 func NewProductModule() IModule {
-	db, err := common.NewMysqlConn()
+	db, err := common.GetNewGormDB()
 	if err != nil {
 		log.Print(err)
 	}

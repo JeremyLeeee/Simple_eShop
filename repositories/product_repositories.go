@@ -1,11 +1,11 @@
 package repositories
 
 import (
-	"database/sql"
 	"eshop/common"
 	"eshop/datamodels"
 	"log"
-	"strconv"
+
+	"gorm.io/gorm"
 )
 
 type IProduct interface {
@@ -19,25 +19,27 @@ type IProduct interface {
 }
 
 type ProductManager struct {
-	table     string
-	mysqlConn *sql.DB
+	table string
+	db    *gorm.DB
 }
 
-func NewProductManager(table string, db *sql.DB) IProduct {
-	return &ProductManager{table: table, mysqlConn: db}
+func NewProductManager(table string, db *gorm.DB) IProduct {
+	return &ProductManager{table: table, db: db}
 }
 
 func (p *ProductManager) Conn() (err error) {
-	if p.mysqlConn == nil {
-		mysql, err := common.NewMysqlConn()
+	if p.db == nil {
+		db, err := common.GetNewGormDB()
 		if err != nil {
+			log.Fatalln("------Error on connection using gorm")
 			return err
 		}
-		p.mysqlConn = mysql
+		p.db = db
 	}
 	if p.table == "" {
-		p.table = "product"
+		p.table = "products"
 	}
+	p.db.AutoMigrate(&datamodels.Product{})
 	return
 }
 
@@ -45,38 +47,18 @@ func (p *ProductManager) Insert(product *datamodels.Product) (productId int64, e
 	if err = p.Conn(); err != nil {
 		return
 	}
-	// define sql script and prepare
-	sql := "INSERT product SET productName=?, productNum=?, productImage=?, productUrl=?"
-	stmt, err := p.mysqlConn.Prepare(sql)
-	if err != nil {
-		log.Println(err)
-		return 0, err
-	}
-	// execute sql
-	result, err := stmt.Exec(product.ProductName, product.ProductNum, product.ProductImage, product.ProductUrl)
-	if err != nil {
-		log.Println(err)
-		return 0, err
-	}
-	return result.LastInsertId()
+	result := p.db.Create(product)
+	return product.ID, result.Error
 }
 
-func (p *ProductManager) Delete(productId int64) bool {
+func (p *ProductManager) Delete(key int64) bool {
 	if err := p.Conn(); err != nil {
 		return false
 	}
-	// define sql script and prepare
-	sql := "DELETE FROM product WHERE ID=?"
-	stmt, err := p.mysqlConn.Prepare(sql)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
 
-	// execute sql
-	_, err = stmt.Exec(productId)
-	if err != nil {
-		log.Println(err)
+	result := p.db.Delete(&datamodels.Product{}, key)
+	if result.Error != nil {
+		log.Fatalln(result.Error)
 		return false
 	}
 	return true
@@ -86,41 +68,18 @@ func (p *ProductManager) Update(product *datamodels.Product) (err error) {
 	if err := p.Conn(); err != nil {
 		return err
 	}
-
-	// define sql script and prepare
-	sql := "UPDATE product SET productName=?, productNum=?, productImage=?, productUrl=? WHERE ID=?"
-	stmt, err := p.mysqlConn.Prepare(sql)
-	if err != nil {
-		return err
-	}
-
-	// execute sql
-	_, err = stmt.Exec(product.ProductName, product.ProductNum,
-		product.ProductImage, product.ProductUrl, strconv.FormatInt(product.ID, 10))
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	result := p.db.Save(product)
+	return result.Error
 }
 
 func (p *ProductManager) SelectByKey(key int64) (product *datamodels.Product, err error) {
 	product = &datamodels.Product{}
+
 	if err = p.Conn(); err != nil {
 		return product, err
 	}
-	sql := "SELECT * from " + p.table + " WHERE ID = " + strconv.FormatInt(key, 10)
-	row, err := p.mysqlConn.Query(sql)
-	if err != nil {
-		return product, err
-	}
-	result := common.GetResultRow(row)
-	if len(result) == 0 {
-		return product, err
-	}
-	common.DataToStructByTagSql(result, product)
-	return
+	result := p.db.First(&product, key)
+	return product, result.Error
 }
 
 func (p *ProductManager) SelectAll() (products []*datamodels.Product, err error) {
@@ -128,25 +87,6 @@ func (p *ProductManager) SelectAll() (products []*datamodels.Product, err error)
 		return nil, err
 	}
 
-	sql := "SELECT * FROM " + p.table
-	rows, err := p.mysqlConn.Query(sql)
-	// defer rows.Close()
-
-	if err != nil {
-		return nil, err
-	}
-	results := common.GetResultRows(rows)
-	if len(results) == 0 {
-		return nil, nil
-	}
-
-	for _, v := range results {
-		product := &datamodels.Product{}
-		common.DataToStructByTagSql(v, product)
-		// log.Print("range find: " + product.ProductName)
-		products = append(products, product)
-
-	}
-
-	return
+	result := p.db.Find(&products)
+	return products, result.Error
 }

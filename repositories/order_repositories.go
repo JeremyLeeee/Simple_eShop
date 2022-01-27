@@ -1,12 +1,11 @@
 package repositories
 
 import (
-	"database/sql"
 	"eshop/common"
 	"eshop/datamodels"
 	"log"
 
-	"strconv"
+	"gorm.io/gorm"
 )
 
 type IOrder interface {
@@ -20,25 +19,32 @@ type IOrder interface {
 }
 
 type OrderManager struct {
-	table     string
-	mysqlConn *sql.DB
+	table string
+	db    *gorm.DB
 }
 
-func NewOrderManager(table string, sql *sql.DB) IOrder {
-	return &OrderManager{table: table, mysqlConn: sql}
+type OrderInfoResult struct {
+	orderID     int64
+	productName string
+	orderStatus int64
+}
+
+func NewOrderManager(table string, db *gorm.DB) IOrder {
+	return &OrderManager{table: table, db: db}
 }
 
 func (o *OrderManager) Conn() (err error) {
-	if o.mysqlConn == nil {
-		mysql, err := common.NewMysqlConn()
+	if o.db == nil {
+		db, err := common.GetNewGormDB()
 		if err != nil {
 			return err
 		}
-		o.mysqlConn = mysql
+		o.db = db
 	}
 	if o.table == "" {
 		o.table = "order"
 	}
+	o.db.AutoMigrate(&datamodels.Order{})
 	return
 }
 
@@ -47,19 +53,8 @@ func (o *OrderManager) Insert(order *datamodels.Order) (orderId int64, err error
 		return
 	}
 
-	sql := "INSERT " + o.table + " SET ID=?, userId=?, productID=?, orderStatus=?"
-	stmt, err := o.mysqlConn.Prepare(sql)
-	if err != nil {
-		log.Println(err)
-		return 0, err
-	}
-
-	result, err := stmt.Exec(order.ID, order.ProductId, order.UserId, order.OrderStatus)
-	if err != nil {
-		log.Println(err)
-		return 0, err
-	}
-	return result.LastInsertId()
+	result := o.db.Create(order)
+	return order.ID, result.Error
 }
 
 func (o *OrderManager) Delete(key int64) bool {
@@ -67,16 +62,9 @@ func (o *OrderManager) Delete(key int64) bool {
 		return false
 	}
 
-	sql := "DELETE FROM " + o.table + " WHERE ID=?"
-	stmt, err := o.mysqlConn.Prepare(sql)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	_, err = stmt.Exec(key)
-	if err != nil {
-		log.Println(err)
+	result := o.db.Delete(&datamodels.Order{}, key)
+	if result.Error != nil {
+		log.Fatal("delete order failed", result.Error)
 		return false
 	}
 	return true
@@ -87,20 +75,8 @@ func (o *OrderManager) Update(order *datamodels.Order) error {
 		return err
 	}
 
-	sql := "UPDATE " + o.table + " SET ID=?, userId=?, productID=?, orderStatu=?, WHERE ID=?"
-	stmt, err := o.mysqlConn.Prepare(sql)
-	if err != nil {
-		return err
-	}
-
-	_, err = stmt.Exec(order.ID, order.ProductId, order.UserId,
-		order.OrderStatus, strconv.FormatInt(order.ID, 10))
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	result := o.db.Save(order)
+	return result.Error
 }
 
 func (o *OrderManager) SelectByKey(key int64) (order *datamodels.Order, err error) {
@@ -108,17 +84,8 @@ func (o *OrderManager) SelectByKey(key int64) (order *datamodels.Order, err erro
 	if err = o.Conn(); err != nil {
 		return order, err
 	}
-	sql := "SELECT * from " + o.table + " WHERE ID = " + strconv.FormatInt(key, 10)
-	row, err := o.mysqlConn.Query(sql)
-	if err != nil {
-		return order, err
-	}
-	result := common.GetResultRow(row)
-	if len(result) == 0 {
-		return order, err
-	}
-	common.DataToStructByTagSql(result, order)
-	return
+	result := o.db.First(&order, key)
+	return order, result.Error
 }
 
 func (o *OrderManager) SelectAll() (orders []*datamodels.Order, err error) {
@@ -126,25 +93,8 @@ func (o *OrderManager) SelectAll() (orders []*datamodels.Order, err error) {
 		return nil, err
 	}
 
-	sql := "SELECT * FROM " + o.table
-	rows, err := o.mysqlConn.Query(sql)
-	// defer rows.Close()
-
-	if err != nil {
-		return nil, err
-	}
-	results := common.GetResultRows(rows)
-	if len(results) == 0 {
-		return nil, err
-	}
-
-	for _, v := range results {
-		order := &datamodels.Order{}
-		common.DataToStructByTagSql(v, order)
-		orders = append(orders, order)
-	}
-
-	return
+	result := o.db.Find(&orders)
+	return orders, result.Error
 }
 
 func (o *OrderManager) SelectAllWithInfo() (orders map[int]map[string]string, err error) {
@@ -152,14 +102,9 @@ func (o *OrderManager) SelectAllWithInfo() (orders map[int]map[string]string, er
 		return nil, err
 	}
 
-	sql := "SELECT o.ID,p.productName,o.orderStatus " +
-		"FROM eshop.order AS o LEFT JOIN product AS p ON o.productID=p.ID"
-
-	rows, err := o.mysqlConn.Query(sql)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
+	rows, err := o.db.Table("orders").Select(
+		"orders.id, products.product_name, orders.order_status").Joins(
+		"left join products on orders.id = products.id").Rows()
 
 	orders = common.GetResultRows(rows)
 	return orders, err
