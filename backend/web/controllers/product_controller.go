@@ -3,7 +3,7 @@ package controllers
 import (
 	"eshop/common"
 	"eshop/datamodels"
-	"eshop/servies"
+	"eshop/services"
 	"strconv"
 
 	"github.com/kataras/iris/v12"
@@ -12,7 +12,7 @@ import (
 
 type ProductController struct {
 	Ctx            iris.Context
-	ProductService servies.IProductService
+	ProductService services.IProductService
 }
 
 func (p *ProductController) GetAll() mvc.View {

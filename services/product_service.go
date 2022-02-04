@@ -1,4 +1,4 @@
-package servies
+package services
 
 import (
 	"eshop/datamodels"
