@@ -1,17 +1,21 @@
 package controllers
 
 import (
+	"eshop/common"
 	"eshop/datamodels"
 	"eshop/services"
+	"log"
+	"strconv"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
+	"github.com/kataras/iris/v12/sessions"
 )
 
 type UserController struct {
 	Ctx         iris.Context
 	UserService services.IUserService
-	// session     *sessions.Session
+	Session     *sessions.Session
 }
 
 func (u *UserController) GetLogin() mvc.View {
@@ -45,5 +49,28 @@ func (u *UserController) PostRegister() {
 		u.Ctx.Redirect("user/error")
 		return
 	}
-	u.Ctx.Redirect("user/login")
+	u.Ctx.Redirect("login")
+}
+
+func (u *UserController) PostLogin() mvc.Response {
+	var (
+		userName = u.Ctx.FormValue("userName")
+		password = u.Ctx.FormValue("password")
+	)
+	log.Println(userName)
+	log.Println(password)
+	user, isOk := u.UserService.IsPwdSuccess(userName, password)
+	log.Print(isOk)
+	if !isOk {
+		return mvc.Response{
+			Path: "login",
+		}
+	}
+	idString := strconv.FormatInt(user.ID, 10)
+	common.GlobalCookie(u.Ctx, "uid", idString)
+	u.Session.Set("uid", idString)
+
+	return mvc.Response{
+		Path: "/product/",
+	}
 }

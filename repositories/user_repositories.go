@@ -5,6 +5,7 @@ import (
 	"errors"
 	"eshop/common"
 	"eshop/datamodels"
+	"log"
 	"strconv"
 )
 
@@ -54,6 +55,7 @@ func (u *UserManager) Select(userName string) (user *datamodels.User, err error)
 	result := common.GetResultRow(rows)
 
 	if len(result) == 0 {
+		log.Println("user not exist")
 		return &datamodels.User{}, errors.New("user not exist")
 	}
 

@@ -3,6 +3,8 @@ package common
 import (
 	"database/sql"
 	"log"
+	"reflect"
+	"strconv"
 	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -37,7 +39,12 @@ func GetResultRow(rows *sql.Rows) map[string]string {
 		rows.Scan(scanArgs...)
 		for i, v := range values {
 			if v != nil {
-				record[columns[i]] = string(v.([]byte))
+				if reflect.TypeOf(v).Name() == "int64" {
+					record[columns[i]] = strconv.FormatInt(v.(int64), 10)
+				} else {
+					record[columns[i]] = string(v.([]byte))
+				}
+
 			}
 		}
 	}

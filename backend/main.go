@@ -21,7 +21,7 @@ func main() {
 	template := iris.HTML("./web/views", ".html").Layout("shared/layout.html").Reload(true)
 	app.RegisterView(template)
 	// set template target
-	app.HandleDir("/public", "./web/public")
+	app.HandleDir("/assets", "./web/assets")
 	// jump to error page while error occur
 	app.OnAnyErrorCode(func(ctx iris.Context) {
 		ctx.ViewData("message", ctx.Values().GetStringDefault("message", "error on page!"))

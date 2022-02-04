@@ -30,7 +30,7 @@ func (s *UserService) IsPwdSuccess(userName string, pwd string) (user *datamodel
 	if !isOK {
 		return &datamodels.User{}, false
 	}
-	return
+	return user, true
 }
 
 func (s *UserService) GetUserByName(userName string) (user *datamodels.User, err error) {
