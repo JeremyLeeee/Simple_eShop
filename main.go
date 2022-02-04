@@ -15,10 +15,10 @@ func main() {
 	// set log level
 	app.Logger().SetLevel("debug")
 	// register templates
-	template := iris.HTML("./web/views", ".html").Layout("shared/layout.html").Reload(true)
+	template := iris.HTML("./web/backend/views", ".html").Layout("shared/layout.html").Reload(true)
 	app.RegisterView(template)
 	// set template target
-	app.HandleDir("/assets", "./web/assets")
+	app.HandleDir("/assets", "./web/backend/assets")
 	// jump to error page while error occur
 	app.OnAnyErrorCode(func(ctx iris.Context) {
 		ctx.ViewData("message", ctx.Values().GetStringDefault("message", "error on page!"))

@@ -1,2 +1,2 @@
 [x] Simplify controller binding
-[ ] Using Gorm to simplify datamodel and repo
+[x] Using Gorm to simplify datamodel and repo
