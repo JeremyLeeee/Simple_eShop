@@ -57,20 +57,18 @@ func (u *UserController) PostLogin() mvc.Response {
 		userName = u.Ctx.FormValue("userName")
 		password = u.Ctx.FormValue("password")
 	)
-	log.Println(userName)
-	log.Println(password)
 	user, isOk := u.UserService.IsPwdSuccess(userName, password)
-	log.Print(isOk)
 	if !isOk {
 		return mvc.Response{
 			Path: "login",
 		}
 	}
+	log.Println("login successfully, userName: " + userName)
 	idString := strconv.FormatInt(user.ID, 10)
 	common.GlobalCookie(u.Ctx, "uid", idString)
 	u.Session.Set("uid", idString)
 
 	return mvc.Response{
-		Path: "/product/",
+		Path: "/product/detail",
 	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"eshop/common"
+	"eshop/frontend/middleware"
 	"eshop/frontend/web/controllers"
 	"eshop/repositories"
 	"eshop/services"
@@ -49,6 +50,14 @@ func main() {
 	user := mvc.New(userParty)
 	user.Register(ctx, userService, sess.Start)
 	user.Handle(new(controllers.UserController))
+
+	productRepository := repositories.NewProductManager("product", db)
+	productService := services.NewProductService(productRepository)
+	productParty := app.Party("/product")
+	product := mvc.New(productParty)
+	productParty.Use(middleware.AuthConProduct)
+	product.Register(ctx, productService)
+	product.Handle(new(controllers.ProductController))
 
 	// start service
 	app.Run(
