@@ -44,7 +44,7 @@ func main() {
 	product.Register(ctx, productService)
 	product.Handle(new(controllers.ProductController))
 
-	orderRepository := repositories.NewOrderManager("order", db)
+	orderRepository := repositories.NewOrderManager("eshop.order", db)
 	orderService := services.NewOrderService(orderRepository)
 	orderParty := app.Party("/order")
 	order := mvc.New(orderParty)

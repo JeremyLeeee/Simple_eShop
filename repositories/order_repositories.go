@@ -37,7 +37,7 @@ func (o *OrderManager) Conn() (err error) {
 		o.mysqlConn = mysql
 	}
 	if o.table == "" {
-		o.table = "order"
+		o.table = "eshop.order"
 	}
 	return
 }
@@ -54,7 +54,7 @@ func (o *OrderManager) Insert(order *datamodels.Order) (orderId int64, err error
 		return 0, err
 	}
 
-	result, err := stmt.Exec(order.ID, order.ProductId, order.UserId, order.OrderStatus)
+	result, err := stmt.Exec(order.ID, order.UserId, order.ProductId, order.OrderStatus)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -87,7 +87,7 @@ func (o *OrderManager) Update(order *datamodels.Order) error {
 		return err
 	}
 
-	sql := "UPDATE " + o.table + " SET ID=?, userId=?, productID=?, orderStatu=?, WHERE ID=?"
+	sql := "UPDATE " + o.table + " SET ID=?, userId=?, productID=?, orderStatus=?, WHERE ID=?"
 	stmt, err := o.mysqlConn.Prepare(sql)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (o *OrderManager) SelectAllWithInfo() (orders map[int]map[string]string, er
 		return nil, err
 	}
 
-	sql := "SELECT o.ID,p.productName,o.orderStatus " +
+	sql := "SELECT o.ID, o.userId, p.productName,o.orderStatus " +
 		"FROM eshop.order AS o LEFT JOIN product AS p ON o.productID=p.ID"
 
 	rows, err := o.mysqlConn.Query(sql)

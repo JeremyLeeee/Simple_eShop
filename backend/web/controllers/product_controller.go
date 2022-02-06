@@ -38,12 +38,12 @@ func (p *ProductController) PostUpdate() {
 	if err != nil {
 		p.Ctx.Application().Logger().Debug(err)
 	}
-	p.Ctx.Redirect("product/all")
+	p.Ctx.Redirect("/product/all")
 }
 
 func (p *ProductController) GetAdd() mvc.View {
 	return mvc.View{
-		Name: "product/add.html",
+		Name: "/product/add.html",
 	}
 }
 
@@ -60,7 +60,7 @@ func (p *ProductController) PostAdd() {
 	if err != nil {
 		p.Ctx.Application().Logger().Debug(err)
 	}
-	p.Ctx.Redirect("product/all")
+	p.Ctx.Redirect("/product/all")
 }
 
 func (p *ProductController) GetManager() mvc.View {

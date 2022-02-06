@@ -66,7 +66,7 @@ func (o *OrderController) GetDelete() {
 	} else {
 		o.Ctx.Application().Logger().Debug("delete id: " + idString + " failed")
 	}
-	o.Ctx.Redirect("order/all")
+	o.Ctx.Redirect("/order/all")
 }
 
 func (o *OrderController) PostUpdate() {
@@ -82,5 +82,5 @@ func (o *OrderController) PostUpdate() {
 	if err != nil {
 		o.Ctx.Application().Logger().Debug(err)
 	}
-	o.Ctx.Redirect("order/all")
+	o.Ctx.Redirect("/order/all")
 }
